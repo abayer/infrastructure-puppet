@@ -1,0 +1,165 @@
+---
+classes:
+  - apache
+  - vhosts_test
+
+apache::mod::macro:
+
+vhosts_test::vhosts:
+  any23:
+    vhost_name: 'any23'
+    port: 80
+    docroot: '/var/www/any23.apache.org'
+    servername: 'www.any23.org'
+    serveraliases:
+      - 'any23.org'
+      - 'any23.com'
+      - 'www.any23.com'
+    redirect_status:
+      - 'permanent'
+    redirect_source:
+      - '/'
+    redirect_dest:
+      - 'http://any23.apache.org'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+
+  aoo:
+    vhost_name: 'aoo'
+    port: 80
+    servername: 'www.openoffice.org'
+    serveraliases:
+      - 'ooo-site.apache.org'
+      - '*.openoffice.org'
+      - 'openoffice.org'
+    docroot: '/var/www/openoffice.apache.org'
+    custom_fragment: 'Use OpenOffice http'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+
+  apache:
+    vhost_name: 'apache.org'
+    port: 80
+    servername: 'www.apache.org'
+    serveraliases:
+      - 'apache.org'
+      - 'apachegroup.org'
+      - 'www.apachegroup.org'
+      - 'www.*.apache.org'
+    docroot: '/var/www/www.apache.org/content'
+    directories:
+      path: '/var/www/www.apache.org/content'
+      options:
+        - 'Indexes'
+        - 'FollowSymLinks'
+        - 'MultiViews'
+        - 'ExecCGI'
+      allow_override:
+        - 'All'
+      addhandlers:
+      -
+        handler: 'cgi-script'
+        extensions:
+          - '.cgi'
+    redirect_status:
+      - 'permanent'
+    redirect_source:
+        - '/docs/vif.info'
+        - '/docs/directives.html'
+        - '/docs/API.html'
+        - '/docs/FAQ.html'
+        - '/manual-index.cgi/docs'
+        - '/bugdb.cgi/'
+        - '/bugdb.cgi'
+        - '/Conference1998'
+        - '/java'
+        - '/perl'
+        - '/docs/manual'
+        - '/docs'
+        - '/httpd'
+        - '/httpd/'
+        - '/httpd.html'
+        - '/index/full'
+        - '/info/css-security'
+        - '/websrc/'
+        - '/from-cvs/'
+        - '/travel/application'
+    redirect_dest:
+        - 'http://httpd.apache.org/docs/misc/vif-info'
+        - 'http://httpd.apache.org/docs/mod/directives.html'
+        - 'http://httpd.apache.org/docs/misc/API.html'
+        - 'http://httpd.apache.org/docs/misc/FAQ.html'
+        - 'http://www.apache.org/search.html'
+        - 'http://bugs.apache.org/index/'
+        - 'http://bugs.apache.org/'
+        - 'http://www.apachecon.com'
+        - 'http://archive.apache.org/dist/java/'
+        - 'http://perl.apache.org'
+        - 'http://httpd.apache.org/docs'
+        - 'http://httpd.apache.org/docs'
+        - 'http://httpd.apache.org'
+        - 'http://httpd.apache.org/'
+        - 'http://httpd.apache.org/'
+        - 'http://www.apache.org'
+        - 'http://httpd.apache.org/info/css-security'
+        - 'http://cvs.apache.org/'
+        - 'http://cvs.apache.org/snapshots/'
+        - 'http:/i/tac-apply.apache.org'
+    rewrites:
+    -
+      rewrite_rule:
+        - '/docs/mod_(.*)$ http://httpd.apache.org/docs/mod/mod_$1 [R=permanent]'
+    -
+      comment: 'Grab referals from www.apache.com and explain where they landed.'
+      rewrite_cond:
+        - '%{HTTP_REFERER} ^http://([^/]*\.)?apache\.com/'
+      rewrite_rule:
+        - '^/dist/.* http://www.apache.org/info/referer-dotcom.html [R,L]'
+    -
+      comment: 'odd ddos coming from aouu.com'
+      rewrite_cond:
+        - '%{HTTP_REFERER} aouu.com'
+      rewrite_rule:
+        - 'RewriteRule ^ - [F,L]'
+    custom_fragment: |
+    <IfModule mod_expires.c>
+      ExpiresActive On
+      ExpiresDefault A3600
+    </IfModule>
+    <Location "/server-status">
+      SetHandler server-status
+    </Location>
+
+
+  spamassassin:
+    priority: 25
+    vhost_name: 'spamassassin'
+    port: 80
+    docroot: '/var/www/spamassassin.apache.org'
+    servername: 'spamassassin.apache.org'
+    serveraliases:
+      - 'spamassassin.*.apache.org'
+    directories:
+      path: '/var/www/spamassassin.apache.org'
+      options:
+        - 'Indexes'
+        - 'FollowSymLinks'
+        - 'MultiViews'
+        - 'ExecCGI'
+      addhandlers:
+      -
+        handler: 'cgi-script'
+        extensions:
+          - '.cgi'
+    rewrites:
+    -
+      rewrite_rule:
+        - '^/favicon.ico /var/www/spamassassin.apache.org/images/favicon.ico'
+    -
+      comment: '/mail/* -> mail-archives.a.o/mod_mbox/*'
+      rewrite_rule:
+        - '^/mail/?$ http://mail-archives.apache.org/mod_mbox/#spamassassin [R=301,L,NE]'
+    -
+      comment: '/mail/* -> mail-archives.a.o/mod_mbox/tlp-list'
+      rewrite_rule:
+        - '^/mail/(.*)$ http://mail-archives.apache.org/mod_mbox/spamassassin-$1 [R=301,L]'
