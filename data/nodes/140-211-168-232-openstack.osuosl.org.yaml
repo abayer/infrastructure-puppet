@@ -48,19 +48,20 @@ vhosts_test::vhosts:
       - 'www.*.apache.org'
     docroot: '/var/www/www.apache.org/content'
     directories:
-      path: '/var/www/www.apache.org/content'
-      options:
-        - 'Indexes'
-        - 'FollowSymLinks'
-        - 'MultiViews'
-        - 'ExecCGI'
-      allow_override:
-        - 'All'
-      addhandlers:
       -
-        handler: 'cgi-script'
-        extensions:
-          - '.cgi'
+        path: '/var/www/www.apache.org/content'
+        options:
+          - 'Indexes'
+          - 'FollowSymLinks'
+          - 'MultiViews'
+          - 'ExecCGI'
+        allow_override:
+          - 'All'
+        addhandlers:
+        -
+          handler: 'cgi-script'
+          extensions:
+            - '.cgi'
     redirect_status:
       - 'permanent'
     redirect_source:
@@ -112,24 +113,15 @@ vhosts_test::vhosts:
     -
       comment: 'Grab referals from www.apache.com and explain where they landed.'
       rewrite_cond:
-        - '%{HTTP_REFERER} ^http://([^/]*\.)?apache\.com/'
+        - '%%{}{HTTP_REFERER} ^http://([^/]*\.)?apache\.com/' # %%{}{VAR} is a nasty hack for %{} escaping
       rewrite_rule:
         - '^/dist/.* http://www.apache.org/info/referer-dotcom.html [R,L]'
     -
       comment: 'odd ddos coming from aouu.com'
       rewrite_cond:
-        - '%{HTTP_REFERER} aouu.com'
+        - '%%{}{HTTP_REFERER} aouu.com' # %%{}{VAR} is a nasty hack for %{} escaping
       rewrite_rule:
         - 'RewriteRule ^ - [F,L]'
-    custom_fragment: |
-    <IfModule mod_expires.c>
-      ExpiresActive On
-      ExpiresDefault A3600
-    </IfModule>
-    <Location "/server-status">
-      SetHandler server-status
-    </Location>
-
 
   spamassassin:
     priority: 25
