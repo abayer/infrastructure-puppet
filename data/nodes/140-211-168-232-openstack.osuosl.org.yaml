@@ -155,6 +155,34 @@ vhosts_test::vhosts:
     access_log_file: 'weblog.log',
     error_log_file: 'errorlog.log',
 
+  deltaspike:
+    priority: 25
+    vhost_name: 'deltaspike'
+    port: 80
+    docroot: '/var/www/deltaspike.apache.org'
+    servername: 'www.cloudstack.org'
+    serveraliases:
+      - 'deltaspike.org'
+    redirect_status:
+      - 'permanent'
+    redirect_source:
+      - '/'
+    redirect_dest:
+      - 'http://deltaspike.apache.org'
+    access_log_file: 'weblog.log',
+    error_log_file: 'errorlog.log',
+
+  gump:
+    priority: 25
+    vhost_name: 'gump'
+    servername: 'gump.apache.org'
+    serveraliases:
+      - 'gump.*.apache.org'
+    docroot: '/var/www/gump.apache.org'
+    custom_fragment: 'ExpiresActive On ExpiresByType text/css access plus 1 day ExpiresByType text/javascript access plus 1 day ExpiresByType image/gif access plus 1 day ExpiresByType image/jpeg access plus 1 day ExpiresByType image/png access plus 1 day'
+    access_log_file: 'weblog.log',
+    error_log_file: 'errorlog.log',
+
   spamassassin:
     priority: 25
     vhost_name: 'spamassassin'
