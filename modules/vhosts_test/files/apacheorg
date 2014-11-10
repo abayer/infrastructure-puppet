@@ -1,0 +1,26 @@
+<IfModule mod_expires.c>
+   ExpiresActive On
+   ExpiresDefault A3600
+</IfModule>
+
+## Set " Access-Control-Allow-Origin: *"  as per https://issues.apache.org/jira/browse/INFRA-2877
+<LocationMatch ^/dist/.*>
+   Header set Access-Control-Allow-Origin "*"
+</LocationMatch>
+
+<Directory /x1/www/www.apache.org/content/dist>
+   IndexOptions FancyIndexing NameWidth=* FoldersFirst \
+   ScanHTMLTitles DescriptionWidth=*
+   HeaderName HEADER.html
+   ReadmeName README.html
+   AllowOverride FileInfo Indexes
+   Options Indexes SymLinksIfOwnerMatch
+</Directory>
+
+<Location /server-status>
+    SetHandler server-status
+    #Require local
+    SetEnv no-gzip
+    AddOutputFilterByType SUBSTITUTE text/html
+    Substitute 's#<h1>Apache Server Status#<style type="text/css">p.notice {border: 1px solid rgb(255, 0, 0); background-color: rgb(238, 238, 238); color: rgb(0, 51, 102); padding: 0.5em; margin: 1em 2em 1em 1em; text-align: center;}</style><p class="notice">Yes, this page is deliberately public, there is no need to report it to our security team and if you do we\'ll just ignore the report</p><h1>Apache Server Status#nq'
+</Location>
