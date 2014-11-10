@@ -1,9 +1,6 @@
 ---
 classes:
-  - apache
   - vhosts_test
-
-apache::mod::macro:
 
 vhosts_test::vhosts:
   any23:
@@ -123,6 +120,40 @@ vhosts_test::vhosts:
       rewrite_rule:
         - 'RewriteRule ^ - [F,L]'
   custom_fragment: 'include /etc/apache2/conf.d/25-apacheorg.conf'
+
+  cloudstack:
+    priority: 25
+    vhost_name: 'cloudstack'
+    port: 80
+    docroot: '/var/www/cloudstack.apache.org'
+    servername: 'www.cloudstack.org'
+    serveraliases:
+      - 'cloudstack.org'
+      - 'cloudstack.com'
+      - 'www.cloudstack.com'
+    redirect_status:
+      - 'permanent'
+    redirect_source:
+      - '/'
+    redirect_dest:
+      - 'http://cloudstack.apache.org'
+    access_log_file: 'weblog.log',
+    error_log_file: 'errorlog.log',
+
+  cloudstack-docs:
+    priority: 25
+    vhost_name: 'cloudstack-docs'
+    port: 80
+    docroot: '/var/www/cloudstack.apache.org'
+    servername: 'docs.cloudstack.org'
+    redirect_status:
+      - 'permanent'
+    redirect_source:
+      - '/'
+    redirect_dest:
+      - 'http://cloudstack.apache.org/docs'
+    access_log_file: 'weblog.log',
+    error_log_file: 'errorlog.log',
 
   spamassassin:
     priority: 25
