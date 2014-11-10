@@ -122,6 +122,7 @@ vhosts_test::vhosts:
         - '%%{}{HTTP_REFERER} aouu.com' # %%{}{VAR} is a nasty hack for %{} escaping
       rewrite_rule:
         - 'RewriteRule ^ - [F,L]'
+  custom_fragment: 'include /etc/apache2/conf.d/25-apacheorg.conf'
 
   spamassassin:
     priority: 25
