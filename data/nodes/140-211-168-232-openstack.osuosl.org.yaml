@@ -104,22 +104,25 @@ vhosts_test::vhosts:
         - 'http://cvs.apache.org/snapshots/'
         - 'http:/i/tac-apply.apache.org'
     rewrites:
-    -
-      rewrite_rule:
-        - '/docs/mod_(.*)$ http://httpd.apache.org/docs/mod/mod_$1 [R=permanent]'
-    -
-      comment: 'Grab referals from www.apache.com and explain where they landed.'
-      rewrite_cond:
-        - '%%{}{HTTP_REFERER} ^http://([^/]*\.)?apache\.com/' # %%{}{VAR} is a nasty hack for %{} escaping
-      rewrite_rule:
-        - '^/dist/.* http://www.apache.org/info/referer-dotcom.html [R,L]'
-    -
-      comment: 'odd ddos coming from aouu.com'
-      rewrite_cond:
-        - '%%{}{HTTP_REFERER} aouu.com' # %%{}{VAR} is a nasty hack for %{} escaping
-      rewrite_rule:
-        - 'RewriteRule ^ - [F,L]'
-  custom_fragment: 'include /etc/apache2/conf.d/25-apacheorg.conf'
+      -
+        rewrite_rule:
+          - '/docs/mod_(.*)$ http://httpd.apache.org/docs/mod/mod_$1 [R=permanent]'
+      -
+        comment: 'Grab referals from www.apache.com and explain where they landed.'
+        rewrite_cond:
+          - '%%{}{HTTP_REFERER} ^http://([^/]*\.)?apache\.com/' # %%{}{VAR} is a nasty hack for %{} escaping
+        rewrite_rule:
+          - '^/dist/.* http://www.apache.org/info/referer-dotcom.html [R,L]'
+      -
+        comment: 'odd ddos coming from aouu.com'
+        rewrite_cond:
+          - '%%{}{HTTP_REFERER} aouu.com' # %%{}{VAR} is a nasty hack for %{} escaping
+        rewrite_rule:
+          - 'RewriteRule ^ - [F,L]'
+    additional_includes:
+      - '/etc/apache2/conf.d/25-apacheorg.conf'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
 
   cloudstack:
     priority: 25
@@ -137,8 +140,8 @@ vhosts_test::vhosts:
       - '/'
     redirect_dest:
       - 'http://cloudstack.apache.org'
-    access_log_file: 'weblog.log',
-    error_log_file: 'errorlog.log',
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
 
   cloudstack-docs:
     priority: 25
@@ -152,8 +155,8 @@ vhosts_test::vhosts:
       - '/'
     redirect_dest:
       - 'http://cloudstack.apache.org/docs'
-    access_log_file: 'weblog.log',
-    error_log_file: 'errorlog.log',
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
 
   deltaspike:
     priority: 25
@@ -169,19 +172,124 @@ vhosts_test::vhosts:
       - '/'
     redirect_dest:
       - 'http://deltaspike.apache.org'
-    access_log_file: 'weblog.log',
-    error_log_file: 'errorlog.log',
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
 
   gump:
     priority: 25
     vhost_name: 'gump'
+    port: 80
     servername: 'gump.apache.org'
     serveraliases:
       - 'gump.*.apache.org'
     docroot: '/var/www/gump.apache.org'
     custom_fragment: 'ExpiresActive On ExpiresByType text/css access plus 1 day ExpiresByType text/javascript access plus 1 day ExpiresByType image/gif access plus 1 day ExpiresByType image/jpeg access plus 1 day ExpiresByType image/png access plus 1 day'
-    access_log_file: 'weblog.log',
-    error_log_file: 'errorlog.log',
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+
+  httpcomponents:
+    priority: 25
+    vhost_name: 'httpcomponents'
+    port: 80
+    servername: 'httpcomponents.apache.org'
+    docroot: '/var/www/hc.apache.org'
+    redirect_status:
+      - 'permanent'
+    redirect_source:
+      - '/'
+    redirect_dest:
+      - 'http://hc.apache.org'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+
+  httpd:
+    priority: 25
+    vhost_name: 'httpd'
+    port: 80
+    servername: 'httpd.apache.org'
+    serveraliases:
+      - 'httpd.*.apache.org'
+    docroot: '/var/www/httpd.apache.org/content'
+    aliases:
+      -
+        # virtualize the language sub"directories"
+        aliasmatch: '^(/docs/(?:2\.[0-6]|trunk))(?:/(?:da|de|en|es|fr|ja|ko|pt-br|ru|tr|zh-cn))?(/.*)?$'
+        path: '/var/www/httpd.apache.org/content$1$2'
+      -
+        # Add an alias, so that /docs/current/ -> /docs/2.4/
+        # and virtualize the language sub"directories"
+        aliasmatch: '^(/docs)/current(?:/(?:da|de|en|es|fr|ja|ko|pt-br|ru|tr|zh-cn))?(/.*)?$'
+        path: '/var/www/httpd.apache.org/content$1/2.4$2'
+      -
+        # virtualize the language sub"directories"
+        aliasmatch: '^(/mod_ftp)(?:/(?:da|de|en|es|fr|ja|ko|pt-br|ru|tr|zh-cn))?(/.*)?$'
+        path: '/var/www/httpd.apache.org/content$1$2'
+      -
+        #virtualize the language sub"directories"
+        aliasmatch: '^(/mod_fcgid)(?:/(?:da|de|en|es|fr|ja|ko|pt-br|ru|tr|zh-cn))?(/.*)?$'
+        path: '/var/www/httpd.apache.org/content$1$2'
+    directories:
+      -
+        path: '/var/www/httpd.apache.org'
+        options:
+          - 'Indexes'
+          - 'FollowSymLinks'
+          - 'MultiViews'
+          - 'ExecCGI'
+        addhandlers:
+          -
+            handler: 'cgi-script'
+            extenions:
+              - '.cgi'
+    rewrites:
+      -
+        comment: '/mail/* -> mail-archives.a.o/mod_mbox/*'
+        rewrite_rule:
+          - '^/mail/?$ http://mail-archives.apache.org/mod_mbox/#httpd [R=301,L,NE]'
+      -
+        comment: '/mail/* -> mail-archives.a.o/mod_mbox/tlp-list'
+        rewrite_rule:
+          - '^/mail/(.*)$ http://mail-archives.apache.org/mod_mbox/httpd-$1 [R=301,L]'
+      -
+        comment: 'If it isnt a specific version or asking for trunk, give it current'
+        rewrite_cond:
+          - '$1 !^(1|2|trunk|index|current)'
+        rewrite_rule:
+          - '^/docs/(.+) /docs/current/$1 [R=301,L]'
+      -
+        comment: 'Convert docs-2.x -> docs/2.x'
+        rewrite_rule:
+          - '^/docs-2\.(.)/(.*) /docs/2.$1/$2 [R=301,L]'
+    additional_includes:
+     - '/etc/conf.d/25-httpd.conf'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+
+  incubator:
+    priority: 25
+    vhost_name: '*'
+    port: 80
+    servername: 'www.apache.org'
+    serveraliases:
+      - '*.incubator.apache.org'
+      - '*.incubaotr.*.apache.org'
+    virtual_docroot: '/var/www/%1.0.apache.org'
+    directories:
+      -
+        path: '/var/www'
+        options:
+          - 'Indexes'
+          - 'FollowSymLinks'
+          - 'MultiViews'
+          - 'ExecCGI'
+        allow_override:
+          - 'All'
+        addhandlers:
+          -
+            handler: 'cgi-script'
+            extensions:
+              - '.cgi'
+    custom_fragment: 'VirtualScriptAlias /var/www/%1.0.apache.org/cgi-bin UseCanonicalName Off Use CatchAll'
 
   spamassassin:
     priority: 25
@@ -192,26 +300,29 @@ vhosts_test::vhosts:
     serveraliases:
       - 'spamassassin.*.apache.org'
     directories:
-      path: '/var/www/spamassassin.apache.org'
-      options:
-        - 'Indexes'
-        - 'FollowSymLinks'
-        - 'MultiViews'
-        - 'ExecCGI'
-      addhandlers:
       -
-        handler: 'cgi-script'
-        extensions:
-          - '.cgi'
+        path: '/var/www/spamassassin.apache.org'
+        options:
+          - 'Indexes'
+          - 'FollowSymLinks'
+          - 'MultiViews'
+          - 'ExecCGI'
+        addhandlers:
+          -
+            handler: 'cgi-script'
+            extensions:
+              - '.cgi'
     rewrites:
-    -
-      rewrite_rule:
-        - '^/favicon.ico /var/www/spamassassin.apache.org/images/favicon.ico'
-    -
-      comment: '/mail/* -> mail-archives.a.o/mod_mbox/*'
-      rewrite_rule:
-        - '^/mail/?$ http://mail-archives.apache.org/mod_mbox/#spamassassin [R=301,L,NE]'
-    -
-      comment: '/mail/* -> mail-archives.a.o/mod_mbox/tlp-list'
-      rewrite_rule:
-        - '^/mail/(.*)$ http://mail-archives.apache.org/mod_mbox/spamassassin-$1 [R=301,L]'
+      -
+        rewrite_rule:
+          - '^/favicon.ico /var/www/spamassassin.apache.org/images/favicon.ico'
+      -
+        comment: '/mail/* -> mail-archives.a.o/mod_mbox/*'
+        rewrite_rule:
+          - '^/mail/?$ http://mail-archives.apache.org/mod_mbox/#spamassassin [R=301,L,NE]'
+      -
+        comment: '/mail/* -> mail-archives.a.o/mod_mbox/tlp-list'
+        rewrite_rule:
+          - '^/mail/(.*)$ http://mail-archives.apache.org/mod_mbox/spamassassin-$1 [R=301,L]'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
