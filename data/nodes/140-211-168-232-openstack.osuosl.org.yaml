@@ -290,6 +290,87 @@ vhosts_test::vhosts:
             extensions:
               - '.cgi'
     custom_fragment: 'VirtualScriptAlias /var/www/%1.0.apache.org/cgi-bin UseCanonicalName Off Use CatchAll'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+
+  jackrabbit:
+    priority: 25
+    vhost_name: 'jackrabbit'
+    port: 80
+    servername: 'jackrabbit.apache.org'
+    serveraliases:
+      - 'jackrabbit.*.apache.org'
+    docroot: '/var/www/jackrabbit.apache.org'
+    directories:
+      -
+        path: '/var/www/jackrabbit.apache.org'
+        allow_override:
+          - 'All'
+    rewrites:
+      -
+        rewrite_rule:
+          - '^/favicon.ico /var/www/jackrabbit.apache.org/favicon.ico'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+
+  jclouds:
+    priority: 25
+    vhost_name: 'jclouds'
+    port: 80
+    servername: 'www.jclouds.org'
+    serveraliases:
+      - 'www.jclouds.net'
+      - 'www.jclouds.com'
+      - 'jclouds.org'
+      - 'jclouds.net'
+      - 'jclouds.com'
+    docroot: '/var/www/jclouds.apache.org'
+    redirect_status:
+      - 'permanent'
+    redirect_source:
+      - '/'
+    redirect_dest:
+      - 'http://jclouds.apache.org/'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+
+  jspwiki:
+    priority: 25
+    vhost_name: 'jspwiki'
+    port: 80
+    servername: 'jspwiki.apache.org'
+    docroot: '/var/www/jspwiki.apache.org'
+    redirect_status:
+      - 'permanent'
+    redirect_source:
+      - '/doc'
+      - '/wiki'
+    redirect_dest:
+      - 'http://jspwiki-doc.apache.org'
+      - 'http://jspwiki-wiki.apache.org'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+
+  libcloud:
+    priority: 25
+    vhost_name: 'libcloud'
+    port: 80
+    servername: 'www.libcloud.org'
+    docroot: '/var/www/libcloud.apache.org'
+    serveraliases:
+      - 'libcloud.org'
+      - 'www.libcloud.net'
+      - 'libcloud.net'
+      - 'www.libcloud.com'
+      - 'libcloud.com'
+    redirect_status:
+      - 'permanent'
+    redirect_source:
+      - '/'
+    redirect_dest:
+      - 'http://libcloud.apache.org/'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
 
   spamassassin:
     priority: 25
